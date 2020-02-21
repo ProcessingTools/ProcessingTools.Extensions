@@ -6,8 +6,6 @@ namespace ProcessingTools.Extensions
 {
     using System;
     using System.Globalization;
-    using ProcessingTools.Common.Constants;
-    using ProcessingTools.Common.Enumerations;
 
     /// <summary>
     /// <see cref="DateTime"/> extensions.
@@ -20,57 +18,14 @@ namespace ProcessingTools.Extensions
         public static DateTime UnixStartDate => new DateTime(year: 1970, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0);
 
         /// <summary>
-        /// Parse string to formatted <see cref="DateTime" />.
-        /// </summary>
-        /// <param name="s">String to be parsed.</param>
-        /// <param name="format">Format string.</param>
-        /// <returns>Parsed date.</returns>
-        public static DateTime? ParseFormat(string s, string format)
-        {
-            if (DateTime.TryParseExact(s: s, format: format, provider: CultureInfo.InvariantCulture, style: DateTimeStyles.AllowWhiteSpaces, result: out DateTime result))
-            {
-                return result == DateTime.MinValue ? (DateTime?)null : result;
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Returns a Unix timestamp that represents the current moment.
-        /// </summary>
-        /// <returns>Now expressed as a Unix timestamp.</returns>
-        /// <remarks>
-        /// See https://stackoverflow.com/questions/17632584/how-to-get-the-unix-timestamp-in-c-sharp.
-        /// </remarks>
-        public static int GetUnixTimestamp()
-        {
-            return (int)Math.Truncate(DateTime.UtcNow.Subtract(UnixStartDate).TotalSeconds);
-        }
-
-        /// <summary>
-        /// Converts a given <see cref="DateTime"/> into a Unix timestamp.
+        /// Returns a new <see cref="DateTime"/> that adds the specified number of weeks to the value of this instance.
         /// </summary>
         /// <param name="instance">This instance.</param>
-        /// <returns>The given <see cref="DateTime"/> in Unix timestamp format.</returns>
-        /// <remarks>
-        /// See https://stackoverflow.com/questions/17632584/how-to-get-the-unix-timestamp-in-c-sharp.
-        /// </remarks>
-        public static int ToUnixTimestamp(this DateTime instance)
+        /// <param name="value">A number of whole and fractional weeks. The value parameter can be negative or positive.</param>
+        /// <returns>An object whose value is the sum of the date and time represented by this instance and the number of weeks represented by value.</returns>
+        public static DateTime AddWeeks(this DateTime instance, double value)
         {
-            return (int)Math.Truncate(instance.ToUniversalTime().Subtract(UnixStartDate).TotalSeconds);
-        }
-
-        /// <summary>
-        /// Converts a given <see cref="int"/> as Unix timestamp into a <see cref="DateTime"/> object.
-        /// </summary>
-        /// <param name="timestamp"><see cref="int"/> as Unix timestamp.</param>
-        /// <returns><see cref="DateTime"/> value of the given <see cref="int"/> as Unix timestamp.</returns>
-        /// <remarks>
-        /// See https://www.unixtimeconverter.io/1924988400.
-        /// </remarks>
-        public static DateTime ToUnixTimestamp(this int timestamp)
-        {
-            return UnixStartDate.AddSeconds(timestamp);
+            return instance.AddDays(value * DateTimeConstants.NumberOfDaysInWeek);
         }
 
         /// <summary>
@@ -102,6 +57,99 @@ namespace ProcessingTools.Extensions
         }
 
         /// <summary>
+        /// Gets the first day of the month.
+        /// </summary>
+        /// <param name="today">Referent date.</param>
+        /// <returns>The first day of the month.</returns>
+        public static DateTime GetFirstDayOfMonth(this DateTime today)
+        {
+            return new DateTime(
+                year: today.Year,
+                month: today.Month,
+                day: 1,
+                hour: today.Hour,
+                minute: today.Minute,
+                second: today.Second,
+                millisecond: today.Millisecond);
+        }
+
+        /// <summary>
+        /// Gets the first day of the week.
+        /// </summary>
+        /// <param name="today">Referent date.</param>
+        /// <returns>The first day of the week.</returns>
+        public static DateTime GetFirstDayOfWeek(this DateTime today)
+        {
+            return today.DayOfWeek == DayOfWeek.Sunday ? today.AddDays(-6) : today.AddDays(-(today.DayOfWeek - DayOfWeek.Monday));
+        }
+
+        /// <summary>
+        /// Gets the last day of the month.
+        /// </summary>
+        /// <param name="today">Referent date.</param>
+        /// <returns>The last day of the month.</returns>
+        public static DateTime GetLastDayOfMonth(this DateTime today)
+        {
+            return today.GetFirstDayOfMonth().AddMonths(1).AddDays(-1);
+        }
+
+        /// <summary>
+        /// Gets the last day of the week.
+        /// </summary>
+        /// <param name="today">Referent date.</param>
+        /// <returns>The last day of the week.</returns>
+        public static DateTime GetLastDayOfWeek(this DateTime today)
+        {
+            return today.DayOfWeek == DayOfWeek.Sunday ? today : today.AddDays(7 - (int)today.DayOfWeek);
+        }
+
+        /// <summary>
+        /// Returns a Unix timestamp that represents the current moment.
+        /// </summary>
+        /// <returns>Now expressed as a Unix timestamp.</returns>
+        /// <remarks>
+        /// See https://stackoverflow.com/questions/17632584/how-to-get-the-unix-timestamp-in-c-sharp.
+        /// </remarks>
+        public static int GetUnixTimestamp()
+        {
+            return (int)Math.Truncate(DateTime.UtcNow.Subtract(UnixStartDate).TotalSeconds);
+        }
+
+        /// <summary>
+        /// Check whether the instance <see cref="DateTime"/> is in the same month with the reference.
+        /// </summary>
+        /// <param name="instance">This instance.</param>
+        /// <param name="reference">The reference.</param>
+        /// <returns>Are in the same month.</returns>
+        public static bool IsInSameMonthWith(this DateTime instance, DateTime reference)
+        {
+            return (instance.Year == reference.Year) && (instance.Month == reference.Month);
+        }
+
+        /// <summary>
+        /// Check whether the instance <see cref="DateTime"/> is in the same week with the reference.
+        /// </summary>
+        /// <param name="instance">This instance.</param>
+        /// <param name="reference">The reference.</param>
+        /// <returns>Are in the same week.</returns>
+        public static bool IsInSameWeekWith(this DateTime instance, DateTime reference)
+        {
+            DateTime beginningOfWeek = instance.This(DateType.Week);
+            return (beginningOfWeek - reference).TotalDays < DateTimeConstants.NumberOfDaysInWeek;
+        }
+
+        /// <summary>
+        /// Check whether the instance <see cref="DateTime"/> is in the same year with the reference.
+        /// </summary>
+        /// <param name="instance">This instance.</param>
+        /// <param name="reference">The reference.</param>
+        /// <returns>Are in the same year.</returns>
+        public static bool IsInSameYearWith(this DateTime instance, DateTime reference)
+        {
+            return instance.Year == reference.Year;
+        }
+
+        /// <summary>
         /// Returns a new <see cref="DateTime"/> that represents the last day in the instance month.
         /// </summary>
         /// <param name="instance">This instance.</param>
@@ -124,6 +172,43 @@ namespace ProcessingTools.Extensions
 
             last = last.AddDays(-Math.Abs(dayOfWeek - last.DayOfWeek));
             return last;
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="DateTime"/> that represents the last unit of time.
+        /// </summary>
+        /// <param name="instance">This instance.</param>
+        /// <param name="dateType">The date unit.</param>
+        /// <returns>New <see cref="DateTime"/> that represents the last unit of time.</returns>
+        public static DateTime Last(this DateTime instance, DateType dateType)
+        {
+            switch (dateType)
+            {
+                case DateType.Day:
+                    return instance.Date.AddDays(-1);
+
+                case DateType.Week:
+                    return instance.Date.AddDays(-2 * DateTimeConstants.NumberOfDaysInWeek).Next(CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
+
+                case DateType.Month:
+                    return instance.Date.First().AddDays(-1).First();
+
+                case DateType.Year:
+                    return new DateTime(year: instance.Year - 1, month: 1, day: 1);
+
+                default:
+                    return instance.Date;
+            }
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="DateTime"/> that represents midnight on the value of this instance.
+        /// </summary>
+        /// <param name="instance">This instance.</param>
+        /// <returns>New <see cref="DateTime"/> that represents midnight on the value of this instance.</returns>
+        public static DateTime Midnight(this DateTime instance)
+        {
+            return new DateTime(year: instance.Year, month: instance.Month, day: instance.Day, hour: 0, minute: 0, second: 0, millisecond: 0);
         }
 
         /// <summary>
@@ -172,81 +257,6 @@ namespace ProcessingTools.Extensions
         }
 
         /// <summary>
-        /// Returns a new <see cref="DateTime"/> that represents the last unit of time.
-        /// </summary>
-        /// <param name="instance">This instance.</param>
-        /// <param name="dateType">The date unit.</param>
-        /// <returns>New <see cref="DateTime"/> that represents the last unit of time.</returns>
-        public static DateTime Last(this DateTime instance, DateType dateType)
-        {
-            switch (dateType)
-            {
-                case DateType.Day:
-                    return instance.Date.AddDays(-1);
-
-                case DateType.Week:
-                    return instance.Date.AddDays(-2 * DateTimeConstants.NumberOfDaysInWeek).Next(CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
-
-                case DateType.Month:
-                    return instance.Date.First().AddDays(-1).First();
-
-                case DateType.Year:
-                    return new DateTime(year: instance.Year - 1, month: 1, day: 1);
-
-                default:
-                    return instance.Date;
-            }
-        }
-
-        /// <summary>
-        /// Returns a new <see cref="DateTime"/> that represents the instance unit of time.
-        /// </summary>
-        /// <param name="instance">This instance.</param>
-        /// <param name="dateUnit">The date unit.</param>
-        /// <returns>Current unit of time.</returns>
-        public static DateTime This(this DateTime instance, DateType dateUnit)
-        {
-            switch (dateUnit)
-            {
-                case DateType.Day:
-                    return instance.Date;
-
-                case DateType.Week:
-                    return instance.Date.AddWeeks(-1).Next(CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
-
-                case DateType.Month:
-                    return instance.Date.First();
-
-                case DateType.Year:
-                    return new DateTime(year: instance.Year, month: 1, day: 1);
-
-                default:
-                    return instance.Date;
-            }
-        }
-
-        /// <summary>
-        /// Returns a new <see cref="DateTime"/> that adds the specified number of weeks to the value of this instance.
-        /// </summary>
-        /// <param name="instance">This instance.</param>
-        /// <param name="value">A number of whole and fractional weeks. The value parameter can be negative or positive.</param>
-        /// <returns>An object whose value is the sum of the date and time represented by this instance and the number of weeks represented by value.</returns>
-        public static DateTime AddWeeks(this DateTime instance, double value)
-        {
-            return instance.AddDays(value * DateTimeConstants.NumberOfDaysInWeek);
-        }
-
-        /// <summary>
-        /// Returns a new <see cref="DateTime"/> that represents midnight on the value of this instance.
-        /// </summary>
-        /// <param name="instance">This instance.</param>
-        /// <returns>New <see cref="DateTime"/> that represents midnight on the value of this instance.</returns>
-        public static DateTime Midnight(this DateTime instance)
-        {
-            return new DateTime(year: instance.Year, month: instance.Month, day: instance.Day, hour: 0, minute: 0, second: 0, millisecond: 0);
-        }
-
-        /// <summary>
         /// Returns a new <see cref="DateTime"/> that represents noon on the value of this instance.
         /// </summary>
         /// <param name="instance">This instance.</param>
@@ -254,6 +264,22 @@ namespace ProcessingTools.Extensions
         public static DateTime Noon(this DateTime instance)
         {
             return new DateTime(year: instance.Year, month: instance.Month, day: instance.Day, hour: 12, minute: 0, second: 0, millisecond: 0);
+        }
+
+        /// <summary>
+        /// Parse string to formatted <see cref="DateTime" />.
+        /// </summary>
+        /// <param name="s">String to be parsed.</param>
+        /// <param name="format">Format string.</param>
+        /// <returns>Parsed date.</returns>
+        public static DateTime? ParseFormat(string s, string format)
+        {
+            if (DateTime.TryParseExact(s: s, format: format, provider: CultureInfo.InvariantCulture, style: DateTimeStyles.AllowWhiteSpaces, result: out DateTime result))
+            {
+                return result == DateTime.MinValue ? (DateTime?)null : result;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -296,84 +322,56 @@ namespace ProcessingTools.Extensions
         }
 
         /// <summary>
-        /// Check whether the instance <see cref="DateTime"/> is in the same year with the reference.
+        /// Returns a new <see cref="DateTime"/> that represents the instance unit of time.
         /// </summary>
         /// <param name="instance">This instance.</param>
-        /// <param name="reference">The reference.</param>
-        /// <returns>Are in the same year.</returns>
-        public static bool IsInSameYearWith(this DateTime instance, DateTime reference)
+        /// <param name="dateUnit">The date unit.</param>
+        /// <returns>Current unit of time.</returns>
+        public static DateTime This(this DateTime instance, DateType dateUnit)
         {
-            return instance.Year == reference.Year;
+            switch (dateUnit)
+            {
+                case DateType.Day:
+                    return instance.Date;
+
+                case DateType.Week:
+                    return instance.Date.AddWeeks(-1).Next(CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
+
+                case DateType.Month:
+                    return instance.Date.First();
+
+                case DateType.Year:
+                    return new DateTime(year: instance.Year, month: 1, day: 1);
+
+                default:
+                    return instance.Date;
+            }
         }
 
         /// <summary>
-        /// Check whether the instance <see cref="DateTime"/> is in the same month with the reference.
+        /// Converts a given <see cref="DateTime"/> into a Unix timestamp.
         /// </summary>
         /// <param name="instance">This instance.</param>
-        /// <param name="reference">The reference.</param>
-        /// <returns>Are in the same month.</returns>
-        public static bool IsInSameMonthWith(this DateTime instance, DateTime reference)
+        /// <returns>The given <see cref="DateTime"/> in Unix timestamp format.</returns>
+        /// <remarks>
+        /// See https://stackoverflow.com/questions/17632584/how-to-get-the-unix-timestamp-in-c-sharp.
+        /// </remarks>
+        public static int ToUnixTimestamp(this DateTime instance)
         {
-            return (instance.Year == reference.Year) && (instance.Month == reference.Month);
+            return (int)Math.Truncate(instance.ToUniversalTime().Subtract(UnixStartDate).TotalSeconds);
         }
 
         /// <summary>
-        /// Check whether the instance <see cref="DateTime"/> is in the same week with the reference.
+        /// Converts a given <see cref="int"/> as Unix timestamp into a <see cref="DateTime"/> object.
         /// </summary>
-        /// <param name="instance">This instance.</param>
-        /// <param name="reference">The reference.</param>
-        /// <returns>Are in the same week.</returns>
-        public static bool IsInSameWeekWith(this DateTime instance, DateTime reference)
+        /// <param name="timestamp"><see cref="int"/> as Unix timestamp.</param>
+        /// <returns><see cref="DateTime"/> value of the given <see cref="int"/> as Unix timestamp.</returns>
+        /// <remarks>
+        /// See https://www.unixtimeconverter.io/1924988400.
+        /// </remarks>
+        public static DateTime ToUnixTimestamp(this int timestamp)
         {
-            DateTime beginningOfWeek = instance.This(DateType.Week);
-            return (beginningOfWeek - reference).TotalDays < DateTimeConstants.NumberOfDaysInWeek;
-        }
-
-        /// <summary>
-        /// Gets the first day of the week.
-        /// </summary>
-        /// <param name="today">Referent date.</param>
-        /// <returns>The first day of the week.</returns>
-        public static DateTime GetFirstDayOfWeek(this DateTime today)
-        {
-            return today.DayOfWeek == DayOfWeek.Sunday ? today.AddDays(-6) : today.AddDays(-(today.DayOfWeek - DayOfWeek.Monday));
-        }
-
-        /// <summary>
-        /// Gets the last day of the week.
-        /// </summary>
-        /// <param name="today">Referent date.</param>
-        /// <returns>The last day of the week.</returns>
-        public static DateTime GetLastDayOfWeek(this DateTime today)
-        {
-            return today.DayOfWeek == DayOfWeek.Sunday ? today : today.AddDays(7 - (int)today.DayOfWeek);
-        }
-
-        /// <summary>
-        /// Gets the first day of the month.
-        /// </summary>
-        /// <param name="today">Referent date.</param>
-        /// <returns>The first day of the month.</returns>
-        public static DateTime GetFirstDayOfMonth(this DateTime today)
-        {
-            return new DateTime(
-                year: today.Year,
-                month: today.Month,
-                day: 1,
-                hour: today.Hour,
-                minute: today.Minute,
-                second: today.Second,
-                millisecond: today.Millisecond);
-        }
-
-        /// <summary>
-        /// Gets the last day of the month.
-        /// </summary>
-        /// <param name="today">Referent date.</param>
-        /// <returns>The last day of the month.</returns>
-        public static DateTime GetLastDayOfMonth(this DateTime today)
-        {
-            return today.GetFirstDayOfMonth().AddMonths(1).AddDays(-1);
+            return UnixStartDate.AddSeconds(timestamp);
         }
     }
 }

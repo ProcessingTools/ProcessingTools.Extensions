@@ -7,6 +7,7 @@ namespace ProcessingTools.Extensions
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
 
     /// <summary>
@@ -28,7 +29,7 @@ namespace ProcessingTools.Extensions
 
             if (enumType.BaseType != typeof(Enum))
             {
-                throw new ArgumentException(nameof(enumType) + " should be of type System.Enum");
+                throw new ArgumentException($"{nameof(enumType)} should be of type {typeof(Enum)}");
             }
 
             var values = Enum.GetValues(enumType).Cast<int>().OrderBy(v => v);
@@ -36,7 +37,7 @@ namespace ProcessingTools.Extensions
             var result = values.Select(v => new
             {
                 Value = v,
-                Text = Enum.Parse(enumType, v.ToString()).ToString(),
+                Text = Enum.Parse(enumType, v.ToString(CultureInfo.InvariantCulture)).ToString(),
             });
 
             return result.ToArray();
@@ -56,7 +57,7 @@ namespace ProcessingTools.Extensions
 
             if (enumType.BaseType != typeof(Enum))
             {
-                throw new ArgumentException(nameof(enumType) + " should be of type System.Enum");
+                throw new ArgumentException($"{nameof(enumType)} should be of type {typeof(Enum)}");
             }
 
             var values = Enum.GetValues(enumType).Cast<int>().OrderBy(v => v);
@@ -65,7 +66,7 @@ namespace ProcessingTools.Extensions
                 .Select(v => new
                 {
                     Value = v,
-                    Text = Enum.Parse(enumType, v.ToString()).ToString(),
+                    Text = Enum.Parse(enumType, v.ToString(CultureInfo.InvariantCulture)).ToString(),
                 })
                 .ToDictionary(x => x.Value, x => x.Text);
 

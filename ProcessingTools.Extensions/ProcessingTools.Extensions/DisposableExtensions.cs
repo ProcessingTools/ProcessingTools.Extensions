@@ -5,7 +5,6 @@
 namespace ProcessingTools.Extensions
 {
     using System;
-    using ProcessingTools.Common.Enumerations;
 
     /// <summary>
     /// Extensions related to <see cref="IDisposable"/>.
@@ -15,15 +14,16 @@ namespace ProcessingTools.Extensions
         /// <summary>
         /// Checks if the object is IDisposable, and if it is tries to dispose it.
         /// </summary>
-        /// <param name="obj">Object to be disposed.</param>
+        /// <param name="instance">Object instance to be disposed.</param>
         /// <returns>DisposeStatus. On exception returns NotDisposed.</returns>
-        public static DisposeStatus TryDispose(this object obj)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Expected")]
+        public static DisposeStatus TryDispose(this object instance)
         {
-            if (obj is IDisposable)
+            if (instance is IDisposable)
             {
                 try
                 {
-                    (obj as IDisposable).Dispose();
+                    (instance as IDisposable).Dispose();
                     return DisposeStatus.Disposed;
                 }
                 catch
