@@ -1,2 +1,2 @@
 # ProcessingTools.Extensions
-Common extensions for C#
+Common extensions for dotnet
