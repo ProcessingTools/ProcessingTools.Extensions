@@ -22,7 +22,7 @@ namespace ProcessingTools.Extensions
         /// <returns>IEnumerable of Value-Text pairs.</returns>
         public static IEnumerable GetEnumValueTextPairs(this Type enumType)
         {
-            if (enumType == null)
+            if (enumType is null)
             {
                 throw new ArgumentNullException(nameof(enumType));
             }
@@ -48,9 +48,9 @@ namespace ProcessingTools.Extensions
         /// </summary>
         /// <param name="enumType">Enum type.</param>
         /// <returns>IEnumerable of Value-Text pairs.</returns>
-        public static IDictionary<int, string> EnumToDictionary(this Type enumType)
+        public static IReadOnlyDictionary<int, string> EnumToDictionary(this Type enumType)
         {
-            if (enumType == null)
+            if (enumType is null)
             {
                 throw new ArgumentNullException(nameof(enumType));
             }
