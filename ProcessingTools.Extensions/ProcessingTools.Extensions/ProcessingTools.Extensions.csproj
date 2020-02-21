@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.1.5</Version>
+    <Version>0.1.0</Version>
     <Company>ProcessingTools</Company>
     <Authors>Bozhin Karaivanov</Authors>
     <Description>Common extensions for dotnet</Description>
@@ -41,7 +41,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="ProcessingTools.Extensions.Dynamic" Version="0.2.2" />
-    <PackageReference Include="ProcessingTools.Extensions.Text" Version="0.1.5" />
+    <PackageReference Include="ProcessingTools.Extensions.Text" Version="0.1.6" />
     <PackageReference Include="SonarAnalyzer.CSharp" Version="8.3.0.14607">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
