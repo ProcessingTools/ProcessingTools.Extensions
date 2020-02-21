@@ -6,6 +6,9 @@ namespace ProcessingTools.Extensions
 {
     using System;
     using System.ComponentModel;
+    using System.Reflection;
+    using System.Text.RegularExpressions;
+    using ProcessingTools.Extensions.Dynamic;
 
     /// <summary>
     /// Convert extensions.
@@ -31,6 +34,31 @@ namespace ProcessingTools.Extensions
             }
 
             return name;
+        }
+
+        /// <summary>
+        /// Get description message for command.
+        /// </summary>
+        /// <param name="type">Source type.</param>
+        /// <returns>Description as string.</returns>
+        public static string GetDescriptionMessageForCommand(this Type type)
+        {
+            if (type is null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            string message = type.GetCustomAttribute<DescriptionAttribute>(false)?.Description;
+
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                var name = Regex.Replace(type.FullName, @".*?([^\.]+)\Z", "$1");
+                name = Regex.Replace(name, @"Command\Z", string.Empty);
+
+                message = Regex.Replace(name, "(?=[A-Z])", " ").Trim();
+            }
+
+            return message;
         }
 
         /// <summary>
